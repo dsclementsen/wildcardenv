@@ -1,0 +1,58 @@
+service: wildcardenv-serverless
+
+plugins:
+  - serverless-python-requirements
+  - serverless-wsgi
+
+custom:
+  wsgi:
+    app: app.app
+    packRequirements: false
+  pythonRequirements:
+    dockerizePip: non-linux
+
+provider:
+  name: aws
+  runtime: python3.6
+  stage: dev
+  region: ap-southeast-2
+  iamRoleStatements:
+  - Effect: "Allow"
+    Action:
+      - "s3:ListBucket"
+    Resource:
+      - "arn:aws:s3:::env.innablr.xyz"
+  - Effect: "Allow"
+    Action:
+      - "s3:PutObject"
+      - "s3:GetObject"
+    Resource:
+      - "arn:aws:s3:::env.innablr.xyz/*"
+  - Effect: "Allow"
+    Action:
+      - "cloudformation:*"
+    Resource:
+      - "*"
+  - Effect: "Allow"
+    Action:
+      - "ec2:*"
+    Resource:
+      - "*"
+  - Effect: "Allow"
+    Action:
+      - "route53:*"
+    Resource:
+      - "*"
+
+functions:
+  app:
+    handler: wsgi.handler
+    events:
+      - http:
+          method: ANY
+          path: /
+          cors: true
+      - http:
+          method: ANY
+          path: '{proxy+}'
+          cors: true
