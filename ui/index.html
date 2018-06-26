@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id" content="919361216275-tiobj6ratp5cvt8fie6vga30tkh50tf0.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+
+    <title>wildcard-env</title>
+
+    <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <!-- Bootstrap -->
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"> -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='./style.css' rel='stylesheet' type='text/css'>
+
+    <script id="templates-template" type="text/x-handlebars-template">
+      {{#each templates}}
+      <div id="env-{{ name }}" class="environment CREATE_COMPLETE">
+        <div class="actions">
+          <div class="dropdown">
+            <a class="btn btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Options
+            </a>
+
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
+              <a class="dropdown-item template-start" href="#">Launch</a>
+              <a class="dropdown-item template-custom" href="#">Customize</a>
+              <a class="dropdown-item env-delete disabled" href="#">Delete</a>
+            </div>
+          </div>
+        </div>
+
+        <h5>{{ name }}</h5>
+
+        <pre class="Content">{{ content }}</pre>
+        <div class="Description">{{ Description }}</div>
+        <div class="CreationTime muted">{{ LastModified }}</div>
+      </div>
+      {{/each}}
+    </script>
+
+    <script id="environments-template" type="text/x-handlebars-template">
+      <div>
+        <div class="padding"><a id="stack-create" class="btn btn-default" href="./launch/">Launch</a></div>
+        {{#each stacks}}
+        <div id="env-{{ StackName }}" class="environment {{ StackStatus }}">
+          <div class="actions">
+            <div class="dropdown">
+              <a class="btn btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{ StackStatusDisplay }}
+              </a>
+
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
+                <a class="dropdown-item env-start" href="#">Start</a>
+                <a class="dropdown-item env-stop" href="#">Stop</a>
+                <a class="dropdown-item env-delete disabled" href="#">Delete</a>
+              </div>
+            </div>
+          </div>
+
+          <h5>{{ StackName }}</h5>
+
+          <div class="Description">{{ Description }}</div>
+          <div class="CreationTime muted">{{ CreationTime }}</div>
+        </div>
+        {{/each}}
+      </div>
+    </script>
+
+
+
+  </head>
+  <body class="page-">
+      <div id="topshade"></div>
+
+
+
+
+
+
+      <div id="template-modal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Launch stack '<span></span>'</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form name="template-parameters" id="template-parameters">
+                <div class="form-group">
+                  <label for="stackname">Stack Name</label>
+                  <input class="form-control" id="stackname" name="stackname" />
+                </div>
+
+                <div class="form-group">
+                  <label for="parameters">Parameters</label>
+                  <textarea class="form-control" id="parameters" name="parameters" rows="5">
+KeyName=davur-dev
+FleetInstanceType=t2.micro
+InitialInstanceCount=2
+                  </textarea>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary">Launch</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+        <div id="showmenu" class="navbar-toggle"></div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+
+	  <div id="menu">
+		  <div id="menu-inner">
+          <div id="logo">
+              <a href="/pages/home/">✻</a>
+          </div>
+
+		  <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+		  <script>
+				  function onSignIn(googleUser) {
+						  // Useful data for your client-side scripts:
+						  var profile = googleUser.getBasicProfile();
+						  console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+						  console.log('Full Name: ' + profile.getName());
+						  console.log('Given Name: ' + profile.getGivenName());
+						  console.log('Family Name: ' + profile.getFamilyName());
+						  console.log("Image URL: " + profile.getImageUrl());
+						  console.log("Email: " + profile.getEmail());
+
+						  // The ID token you need to pass to your backend:
+						  var id_token = googleUser.getAuthResponse().id_token;
+						  console.log("ID Token: " + id_token);
+				  };
+		  </script>
+	
+			<div id="fancy-hover">
+			<ul>
+				<li><a href="#env" id="nav-environments">Environments</a></li>
+				<li><a href="#templates" id="nav-templates">Templates</a></li>
+			</ul>
+			<div id="fancy-hover-active">&nbsp;</div>
+		    </div>
+		  </div>
+		</div>
+      </div>
+	  <div id="main">
+
+      <div class="container-fluid">
+
+
+
+
+      <!-- <div id="env-wildcardenv-catchall" class="environment DELETED">
+        <div class="actions">
+          <div class="dropdown">
+            <a class="btn btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Checking...</a>
+
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
+              <a class="dropdown-item env-start" href="#">Start</a>
+              <a class="dropdown-item env-stop" href="#">Stop</a>
+              <a class="dropdown-item env-delete" href="#">Delete</a>
+            </div>
+          </div>
+        </div>
+
+      <h5>test
+      </h5>
+
+      <p>Using color to add meaning only provides a visual indication, which will not be conveyed to users of assistive technologies – such as screen readers. Ensure that information denoted by the color is either obvious from the content itself (e.g. the visible text), or is included through alternative means, such as additional text hidden with the <code class="highlighter-rouge">.sr-only</code> class.</p>
+      </div>
+
+
+
+      <div id="env-wildcardenv-test" class="environment DELETED">
+        <div class="actions">
+          <div class="dropdown">
+            <a class="btn btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Checking...</a>
+
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
+              <a class="dropdown-item env-start" href="#">Start</a>
+              <a class="dropdown-item env-stop" href="#">Stop</a>
+              <a class="dropdown-item env-delete" href="#">Delete</a>
+            </div>
+          </div>
+        </div>
+
+      <h5>uat
+      </h5>
+
+      <p>Using color to add meaning only provides a visual indication, which will not be conveyed to users of assistive technologies – such as screen readers. Ensure that information denoted by the color is either obvious from the content itself (e.g. the visible text), or is included through alternative means, such as additional text hidden with the <code class="highlighter-rouge">.sr-only</code> class.</p>
+      </div>
+
+
+ -->
+
+        <div id="placeholder"></div>
+
+
+
+
+      </div>
+	  </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script> -->
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script> -->
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.js"></script>
+
+
+    <script src="./app.js"></script>
+  </body>
+</html>

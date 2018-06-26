@@ -56,3 +56,6 @@ functions:
           method: ANY
           path: '{proxy+}'
           cors: true
+          # authorizer: authorizerFunc
+  authorizerFunc:
+    handler: app.lambda_handler
