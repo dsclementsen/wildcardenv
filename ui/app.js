@@ -13,10 +13,34 @@ var context = {
 	stacks: [],
 	templates: []
 };
+var id_token = null;
 var page = 'stacks';
 
 var API_BASE_URL = 'https://3mq1qnh4p2.execute-api.ap-southeast-2.amazonaws.com/dev/';
 var debug = false;
+var email = "";
+
+
+function onSignIn(googleUser) {
+	// Useful data for your client-side scripts:
+	var profile = googleUser.getBasicProfile();
+	console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+	console.log('Full Name: ' + profile.getName());
+	console.log('Given Name: ' + profile.getGivenName());
+	console.log('Family Name: ' + profile.getFamilyName());
+	console.log("Image URL: " + profile.getImageUrl());
+	console.log("Email: " + profile.getEmail());
+	email = profile.getEmail();
+
+	if (email.endsWith("@innablr.com")) {
+		console.log("Authorized");
+		id_token = googleUser.getAuthResponse().id_token;
+	}
+	else {
+		console.log("Unauthorized");
+		id_token = null;
+	}
+};
 
 $(document).ready(function() {
 	$('.navbar-toggle').on('click', function() {
@@ -76,11 +100,18 @@ $(document).ready(function() {
 
 
 		console.log([templateName, stackName]);
-		$.getJSON(API_BASE_URL + 'api/templates/' + templateName + '/quicklaunch/' + stackName, function(data){
-			console.log(data);
-			page = "stacks";
-			loadStacks();
-			// updateEnvironmentStatus($env, data.status);
+		$.ajax({
+			dataType: "json",
+			url: API_BASE_URL + 'api/templates/' + templateName + '/quicklaunch/' + stackName,
+			headers: {
+				"Authorization": id_token
+			},
+			success: function(data){
+				console.log(data);
+				page = "stacks";
+				loadStacks();
+				// updateEnvironmentStatus($env, data.status);
+			}
 		});
 	});
 
@@ -89,20 +120,18 @@ $(document).ready(function() {
 		var $env = $(this).closest(".environment");
 		var [_, pk] = $env.attr("id").split("-");
 		console.log(pk);
-		$.getJSON(API_BASE_URL + 'api/stacks/' + pk + '/launch/', function(data){
-			console.log(data);
-			updateEnvironmentStatus($env, data.status);
+		$.ajax({
+			dataType: "json",
+			url: API_BASE_URL + 'api/stacks/' + pk + '/launch/', 
+			headers: {
+				"Authorization": id_token
+			},
+			success: function(data) {
+				console.log(data);
+				updateEnvironmentStatus($env, data.status);
+			}
 		});
 	});
-	// $(".env-start").on("click", function(event) {
-	// 	var $env = $(this).closest(".environment");
-	// 	var [_, pk] = $env.attr("id").split("-");
-	// 	console.log(pk);
-	// 	$.getJSON('http://localhost:8000/wildcardenv/api/environments/' + pk + '/launch/', function(data){
-	// 		console.log(data);
-	// 		updateEnvironmentStatus($env, data.status);
-	// 	});
-	// });
 
 	$("#main").on("click", ".env-stop", function(event) {
 		console.log('stop');
@@ -113,21 +142,18 @@ $(document).ready(function() {
 
 		console.log(stackName);
 		//https://1h6df94d9e.execute-api.ap-southeast-2.amazonaws.com/dev
-		$.getJSON(API_BASE_URL + 'api/stacks/' + stackName + '/stop', function(data){
-			console.log(data);
-			updateEnvironmentStatus($env, "DELETE_IN_PROGRESS");
+		$.ajax({
+			dataType: "json",
+			url: API_BASE_URL + 'api/stacks/' + stackName + '/stop', 
+			headers: {
+				"Authorization": id_token
+			},
+			success: function(data){
+				console.log(data);
+				updateEnvironmentStatus($env, "DELETE_IN_PROGRESS");
+			}
 		});
 	});
-	// $(".env-stop").on("click", function(event) {
-	// 	var $env = $(this).closest(".environment");
-	// 	var [_, pk] = $env.attr("id").split("-");
-	// 	console.log(pk);
-	// 	$.getJSON('http://localhost:8000/wildcardenv/api/environments/' + pk + '/stop/', function(data){
-	// 		console.log(data);
-	// 		updateEnvironmentStatus($env, "DELETE_IN_PROGRESS");
-	// 	});
-	// 	// http://localhost:8000/wildcardenv/api/environments/1/refresh/
-	// });
 
 	// refreshEnvironments();
 	loadStacks();

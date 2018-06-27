@@ -54,8 +54,16 @@ functions:
           cors: true
       - http:
           method: ANY
+          path: /api/templates
+          cors: true
+      - http:
+          method: ANY
+          path: /api/stacks
+          cors: true
+      - http:
+          method: ANY
           path: '{proxy+}'
           cors: true
-          # authorizer: authorizerFunc
+          authorizer: authorizerFunc
   authorizerFunc:
     handler: app.lambda_handler
